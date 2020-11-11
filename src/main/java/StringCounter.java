@@ -1,42 +1,39 @@
-import java.util.Arrays;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class StringCounter {
 
     public String longestConsec(int wordCount, String[] list) {
-//        max - максимальное значение последовательности строк
-        int max = 0;
+//        currentMaxIndex - текущее значение индекса конца максимальной последовательности
+        int currentMaxIndex = wordCount - 1;
 
-//        currentMaxIndexes - текущее значение индексов максимальной последовательности
-        int[] currentMaxIndexes = new int[wordCount];
+//        temporalMax - временная максимальная длина последовательности
+        int temporalMax = (int) IntStream.iterate(0, x -> x + 1)
+                .boxed()
+                .limit(wordCount)
+                .map(x -> list[x].length())
+                .mapToDouble(x -> x)
+                .sum();
 
-        for (int i = wordCount - 1; i < list.length; i++) {
+//        max - максимальная длина последовательности
+        int max = temporalMax;
 
-//            temporalMax - текущее максимальное значение последовательности строк
-            int temporalMax = 0;
+        for (int i = wordCount; i < list.length; i++) {
 
-            for (int j = i - (wordCount - 1); j < i; j++) {
-                temporalMax += list[j].length();
-            }
-
+//            вычитаем длину первого слова и добавляем длину нового слова
+            temporalMax -= list[i - wordCount].length();
             temporalMax += list[i].length();
 
             if (temporalMax > max) {
                 max = temporalMax;
-
-//                offset - переменная для сдвига
-                int offset = wordCount - 1;
-
-                for (int k = 0; k < wordCount; k++) {
-                    currentMaxIndexes[k] = i - offset;
-                    offset -= 1;
-                }
+                currentMaxIndex = i;
             }
         }
 
-        return Arrays.stream(currentMaxIndexes)
+        return IntStream.iterate(currentMaxIndex - wordCount + 1, x -> x + 1)
                 .boxed()
-                .map(x -> list[x])
+                .limit(wordCount)
+                .map(a -> list[a])
                 .collect(Collectors.joining());
     }
 }
